@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>In-Silico Physics Laboratory — P0.2: LHC Bump Hunter & Statistical Discovery</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      background-color: #070b14;
+      color: #e2e8f0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .lab-card {
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
+    }
+    .lab-panel {
+      background-color: #090e1a;
+      border: 1px solid #1e293b;
+      border-radius: 0.75rem;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .math-box {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(244, 63, 94, 0.06));
+      border-left: 3px solid #38bdf8;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      border-radius: 0.5rem;
+      background-color: #050811;
+      border: 1px solid #1e293b;
+    }
+    input[type="range"] {
+      accent-color: #38bdf8;
+      cursor: pointer;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      display: inline-block;
+      animation: pulseGlow 1.8s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.25); }
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-sky-500/30 selection:text-sky-200">
+
+  <!-- TOP NAVIGATION -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-[#070b14]/85 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="status-dot bg-rose-500"></span>
+        <span class="mono text-xs sm:text-sm font-semibold tracking-wider uppercase text-sky-400">
+          IN-SILICO COLLIDER LAB // P0.2: BUMP-HUNTER (H → γγ)
+        </span>
+      </div>
+      <nav class="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-medium">
+        <a href="#station-1" class="px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-sky-500/20 hover:text-sky-300 transition">01 · Diphoton Spectrum</a>
+        <a href="#station-2" class="px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-emerald-500/20 hover:text-emerald-300 transition">02 · Poisson NLL</a>
+        <a href="#station-3" class="px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-rose-500/20 hover:text-rose-300 transition">03 · 5σ Discovery Engine</a>
+        <a href="#station-4" class="px-3 py-1.5 rounded-lg bg-slate-800/70 hover:bg-purple-500/20 hover:text-purple-300 transition">04 · Mass Scan &amp; 95% CL Limits</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-14">
+
+    <!-- HERO SECTION -->
+    <section class="lab-card p-6 sm:p-10 relative overflow-hidden">
+      <div class="max-w-4xl space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs mono">
+          <span>PHASE 0 · PROJECT P0.2 INTERACTIVE CERN STATISTICAL LABORATORY</span>
+        </div>
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white leading-tight">
+          Hunting the Higgs Boson ($H \to \gamma\gamma$): Profile Likelihoods, $5\sigma$ Discovery &amp; Look-Elsewhere Effect
+        </h1>
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+          In High Energy Physics at the CERN Large Hadron Collider (ATLAS &amp; CMS), new particles are not observed directly as isolated photographs. Instead, they manifest as subtle resonant excesses—<strong>"bumps"</strong>—on top of a massive, falling continuum of quantum background events. This interactive laboratory implements the full frequentist statistical machinery used in the 2012 Higgs boson discovery: inverse-transform Monte Carlo generation, binned Poisson log-likelihood profiling, Wilks' theorem test statistics ($q_0, Z = \sqrt{q_0}$), the Look-Elsewhere Effect ($p_{\text{global}}$), and $95\%$ Confidence Level upper limits ($\mu_{95}$).
+        </p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+          <div class="lab-panel p-3">
+            <div class="text-xs text-slate-400 mono">DECAY CHANNEL</div>
+            <div class="text-lg font-bold text-sky-400 mono">H → γγ (125 GeV)</div>
+          </div>
+          <div class="lab-panel p-3">
+            <div class="text-xs text-slate-400 mono">TEST STATISTIC</div>
+            <div class="text-lg font-bold text-emerald-400 mono">q₀ = 2(NLL₀ − NLL₁)</div>
+          </div>
+          <div class="lab-panel p-3">
+            <div class="text-xs text-slate-400 mono">DISCOVERY THRESHOLD</div>
+            <div class="text-lg font-bold text-rose-400 mono">Z ≥ 5.0σ (p ≤ 2.9e-7)</div>
+          </div>
+          <div class="lab-panel p-3">
+            <div class="text-xs text-slate-400 mono">EXCLUSION BOUND</div>
+            <div class="text-lg font-bold text-purple-400 mono">μ₉₅ = max(0,μ̂)+1.645σ</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- STATION 01: DIPHOTON SPECTRUM & RESIDUAL BUMP                         -->
+    <!-- ===================================================================== -->
+    <section id="station-1" class="lab-card p-6 sm:p-8 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div>
+          <span class="mono text-xs uppercase tracking-widest text-sky-400">STATION 01 // src/bumphunter/data.py</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">
+            LHC Diphoton Invariant Mass Spectrum ($m_{\gamma\gamma}$) &amp; Background Subtraction
+          </h2>
+        </div>
+        <button id="btn-recollide" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold text-xs mono transition">
+          ⚡ Generate New LHC Run
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Controls & Theory -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="math-box p-4 rounded-lg space-y-2 text-xs sm:text-sm text-slate-200">
+            <div class="font-semibold text-sky-300 mono">Physical Model (100–160 GeV)</div>
+            <p class="text-slate-300 leading-relaxed">
+              Non-resonant diphoton background follows a truncated exponential distribution $p_b(m) \propto e^{-\lambda m}$ sampled via exact Inverse Transform Sampling:
+            </p>
+            <div class="mono text-xs bg-slate-950/80 p-2 rounded border border-slate-800 text-sky-200">
+              m = m_min - ln(1 - u·(1 - e^(-λ·Δm))) / λ
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              The Higgs resonance ($m_H \approx 125\text{ GeV}$) is smeared by the electromagnetic calorimeter resolution $\sigma_{\text{ECAL}} \approx 1.5\text{ GeV}$ into a Gaussian peak.
+            </p>
+          </div>
+
+          <div class="lab-panel p-4 space-y-4">
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Continuum Background (N_B):</span>
+                <span id="lbl-nb" class="text-sky-400 font-bold">20,000</span>
+              </div>
+              <input id="sl-nb" type="range" min="4000" max="50000" step="2000" value="20000" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Injected Higgs Signal (N_S = μ·350):</span>
+                <span id="lbl-ns" class="text-rose-400 font-bold">350 (μ = 1.00)</span>
+              </div>
+              <input id="sl-ns" type="range" min="0" max="700" step="10" value="350" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">True Higgs Mass (m_H):</span>
+                <span id="lbl-mh" class="text-emerald-400 font-bold">125.0 GeV</span>
+              </div>
+              <input id="sl-mh" type="range" min="112" max="148" step="1" value="125" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Detector Resolution (σ):</span>
+                <span id="lbl-sigma" class="text-amber-400 font-bold">1.5 GeV</span>
+              </div>
+              <input id="sl-sigma" type="range" min="0.8" max="3.5" step="0.1" value="1.5" class="w-full" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs mono">
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">TOTAL EVENTS</div>
+              <div id="stat-total" class="text-base font-bold text-white mt-0.5">20,350</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">PEAK BIN (125 GeV)</div>
+              <div id="stat-peakbin" class="text-base font-bold text-rose-400 mt-0.5">425 evts</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Display -->
+        <div class="lg:col-span-8 space-y-3">
+          <canvas id="cv-spectrum" width="820" height="460"></canvas>
+          <div class="flex flex-wrap justify-between text-xs text-slate-400 mono px-1">
+            <span>● White Points: Observed Binned Counts (±√N Poisson Error Bars)</span>
+            <span class="text-sky-400">--- Dashed Cyan: Fitted Background B(m)</span>
+            <span class="text-rose-400">━━ Solid Rose: Signal + Background Fit</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- STATION 02: POISSON NEGATIVE LOG-LIKELIHOOD                           -->
+    <!-- ===================================================================== -->
+    <section id="station-2" class="lab-card p-6 sm:p-8 space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <span class="mono text-xs uppercase tracking-widest text-emerald-400">STATION 02 // src/bumphunter/likelihood.py</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">
+          Poisson Negative Log-Likelihood ($\text{NLL}$) &amp; Single-Bin Penalty Intuition
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="math-box p-4 rounded-lg space-y-2 text-xs sm:text-sm">
+            <div class="font-semibold text-emerald-300 mono">Why $\nu - n \ln \nu$?</div>
+            <p class="text-slate-300 leading-relaxed">
+              Each histogram bin $i$ is an independent Poisson counter with expected yield $\nu_i(\mu) = \mu S_i + B_i$ and observed count $n_i$. Dropping the constant $\ln(n_i!)$, the Negative Log-Likelihood penalty is:
+            </p>
+            <div class="mono text-xs bg-slate-950/80 p-2 rounded border border-slate-800 text-emerald-300">
+              NLL(ν) = Σ [ νᵢ − nᵢ · ln(νᵢ) ]
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              Setting $\frac{\partial \text{NLL}}{\partial \nu} = 1 - \frac{n}{\nu} = 0$ proves that the penalty is strictly minimized when the model expectation equals the observed data ($\nu = n$).
+            </p>
+          </div>
+
+          <div class="lab-panel p-4 space-y-4">
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Observed Events in Bin (n_obs):</span>
+                <span id="lbl-nobs" class="text-white font-bold">150</span>
+              </div>
+              <input id="sl-nobs" type="range" min="50" max="250" step="1" value="150" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Skeptic Hypothesis (Background B₀):</span>
+                <span id="lbl-b0" class="text-sky-400 font-bold">100</span>
+              </div>
+              <input id="sl-b0" type="range" min="50" max="250" step="1" value="100" class="w-full" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-xs mono">
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">NLL(B₀)</div>
+              <div id="stat-nll0-bin" class="text-sm font-bold text-sky-400 mt-0.5">-590.78</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">NLL(n_obs)</div>
+              <div id="stat-nll1-bin" class="text-sm font-bold text-emerald-400 mt-0.5">-601.60</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">ΔNLL Penalty</div>
+              <div id="stat-dnll-bin" class="text-sm font-bold text-rose-400 mt-0.5">+10.82</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-3">
+          <canvas id="cv-nll" width="820" height="360"></canvas>
+          <div class="text-xs text-slate-400 mono px-1">
+            The vertical gap between the Skeptic's prediction $\nu = B_0$ and the minimum $\hat{\nu} = n_{\text{obs}}$ is $\Delta\text{NLL}$. By Wilks' theorem, $q_0 = 2\Delta\text{NLL}$ directly measures the statistical tension in units of $\sigma^2$!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- STATION 03: PROFILE LIKELIHOOD RATIO & 5-SIGMA DISCOVERY ENGINE       -->
+    <!-- ===================================================================== -->
+    <section id="station-3" class="lab-card p-6 sm:p-8 space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
+        <div>
+          <span class="mono text-xs uppercase tracking-widest text-rose-400">STATION 03 // src/bumphunter/discovery.py</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">
+            Profile Likelihood Ratio $q_0(\mu)$ &amp; CERN $5\sigma$ Discovery Verdict
+          </h2>
+        </div>
+        <div id="badge-verdict" class="px-4 py-1.5 rounded-full text-xs mono font-bold bg-emerald-500/20 border border-emerald-500/50 text-emerald-300">
+          ★ 5σ HIGGS DISCOVERY CONFIRMED
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="math-box p-4 rounded-lg space-y-2 text-xs sm:text-sm">
+            <div class="font-semibold text-rose-300 mono">One-Sided Test Statistic $q_0$</div>
+            <p class="text-slate-300 leading-relaxed">
+              To test whether the collider data in <strong>Station 01</strong> contains a positive signal excess ($\hat{\mu} > 0$) against the background-only null hypothesis ($\mu = 0$), we compute:
+            </p>
+            <div class="mono text-xs bg-slate-950/80 p-2 rounded border border-slate-800 text-rose-200">
+              q₀ = 2 · (NLL₀ − NLL₁)  if μ̂ > 0  else 0
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              Under Wilks' asymptotic theorem, significance in Gaussian standard deviations is simply $Z = \sqrt{q_0}$, with local $p$-value $p_{\text{local}} = 1 - \Phi(Z)$.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs mono">
+            <div class="lab-panel p-3.5">
+              <div class="text-slate-400">FITTED SIGNAL (μ̂)</div>
+              <div id="stat-muhat" class="text-lg font-bold text-emerald-400 mt-1">1.05 ± 0.13</div>
+            </div>
+            <div class="lab-panel p-3.5">
+              <div class="text-slate-400">TEST STATISTIC (q₀)</div>
+              <div id="stat-q0" class="text-lg font-bold text-sky-400 mt-1">64.20</div>
+            </div>
+            <div class="lab-panel p-3.5">
+              <div class="text-slate-400">LOCAL SIGNIFICANCE (Z)</div>
+              <div id="stat-zlocal" class="text-lg font-bold text-rose-400 mt-1">8.01 σ</div>
+            </div>
+            <div class="lab-panel p-3.5">
+              <div class="text-slate-400">LOCAL P-VALUE</div>
+              <div id="stat-plocal" class="text-lg font-bold text-amber-400 mt-1">5.5e-16</div>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-400 leading-relaxed">
+            💡 <strong>Interactive Experiment:</strong> Scroll slightly up to <strong>Station 01</strong> and drag the <em>Injected Higgs Signal ($N_S$)</em> slider down to $0$, $100$, or $350$ — watch the parabola $2\Delta\text{NLL}(\mu)$ shift in real time!
+          </p>
+        </div>
+
+        <div class="lg:col-span-8 space-y-3">
+          <canvas id="cv-profile" width="820" height="360"></canvas>
+          <div class="flex flex-wrap justify-between text-xs text-slate-400 mono px-1">
+            <span class="text-sky-400">━━ Cyan Curve: 2ΔNLL(μ) Parabola</span>
+            <span class="text-emerald-400">--- Green Line: Best-Fit μ̂</span>
+            <span class="text-rose-400">● Red Point at μ=0: Intercept q₀ = Z²</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- STATION 04: MASS SCAN (LOOK-ELSEWHERE EFFECT) & 95% CL UPPER LIMITS   -->
+    <!-- ===================================================================== -->
+    <section id="station-4" class="lab-card p-6 sm:p-8 space-y-6">
+      <div class="border-b border-slate-800 pb-4">
+        <span class="mono text-xs uppercase tracking-widest text-purple-400">STATION 04 // src/bumphunter/limits.py</span>
+        <h2 class="text-xl sm:text-2xl font-bold text-white mt-1">
+          Mass Scan ($110\text{--}150\text{ GeV}$), Look-Elsewhere Effect &amp; $95\%$ CL Upper Limits
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="math-box p-4 rounded-lg space-y-2 text-xs sm:text-sm">
+            <div class="font-semibold text-purple-300 mono">1. Look-Elsewhere Effect (LEE)</div>
+            <p class="text-slate-300 leading-relaxed">
+              When searching across $N_{\text{trials}}$ mass hypotheses without knowing $m_H$ in advance, the probability of a random background fluctuation anywhere in the search window increases:
+            </p>
+            <div class="mono text-xs bg-slate-950/80 p-2 rounded border border-slate-800 text-purple-200">
+              p_global = 1 − (1 − p_local)^(N_trials)
+            </div>
+            <div class="font-semibold text-purple-300 mono pt-1">2. 95% CL Upper Limit ($\mu_{95}$)</div>
+            <p class="text-slate-300 leading-relaxed">
+              Where no signal is observed, physicists set a $95\%$ confidence upper bound $\mu_{95} = \max(0, \hat{\mu}) + 1.645\sigma_\mu$, which tightens as $\sigma_\mu \propto 1/\sqrt{\mathcal{L}}$ with higher collider luminosity.
+            </p>
+          </div>
+
+          <div class="lab-panel p-4 space-y-4">
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Number of Mass Trials (N_trials):</span>
+                <span id="lbl-ntrials" class="text-purple-400 font-bold">41 masses</span>
+              </div>
+              <input id="sl-ntrials" type="range" min="1" max="200" step="1" value="41" class="w-full" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-xs mono mb-1">
+                <span class="text-slate-400">Test Mass for 95% Limit (m_test):</span>
+                <span id="lbl-mtest" class="text-sky-400 font-bold">140.0 GeV</span>
+              </div>
+              <input id="sl-mtest" type="range" min="110" max="150" step="1" value="140" class="w-full" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-xs mono">
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">MAX Z_LOCAL (@ <span id="stat-bestm">125</span> GeV)</div>
+              <div id="stat-scan-zloc" class="text-base font-bold text-purple-400 mt-0.5">8.01 σ</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">GLOBAL Z_GLOBAL (LEE)</div>
+              <div id="stat-scan-zglob" class="text-base font-bold text-emerald-400 mt-0.5">7.54 σ</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">σ_μ AT m_test</div>
+              <div id="stat-sigmamu" class="text-base font-bold text-sky-400 mt-0.5">0.098</div>
+            </div>
+            <div class="lab-panel p-3">
+              <div class="text-slate-400">95% UPPER LIMIT (μ₉₅)</div>
+              <div id="stat-mu95" class="text-base font-bold text-amber-400 mt-0.5">0.162</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-3">
+          <canvas id="cv-scan" width="820" height="380"></canvas>
+          <div class="flex flex-wrap justify-between text-xs text-slate-400 mono px-1">
+            <span class="text-purple-400">━━ Purple Curve: Local Significance Z_local(m_H)</span>
+            <span class="text-emerald-400">--- Green Dotted: Global Z_global (LEE Corrected)</span>
+            <span class="text-rose-400">--- Red Dashed: 5σ Discovery Threshold</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-8 border-t border-slate-800/80 text-center text-xs text-slate-500 mono">
+    In-Silico Physics Laboratory · Phase 0 Project P0.2 (bump-hunter) · Built with Pure HTML5 Canvas &amp; Mathematical Statistics
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- SCIENTIFIC SIMULATION & STATISTICAL ENGINE (PURE JAVASCRIPT)          -->
+  <!-- ===================================================================== -->
+  <script>
+    // --- Mathematical & Statistical Primitives ---
+    function erf(x) {
+      const sign = x >= 0 ? 1 : -1;
+      x = Math.abs(x);
+      const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+      const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+      const t = 1.0 / (1.0 + p * x);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+      return sign * y;
+    }
+
+    function normCdf(x, loc = 0.0, scale = 1.0) {
+      return 0.5 * (1.0 + erf((x - loc) / (scale * Math.SQRT2)));
+    }
+
+    function normSf(z) {
+      return 0.5 * (1.0 - erf(z / Math.SQRT2));
+    }
+
+    // Rational approximation for inverse standard normal survival function norm.isf(p)
+    function normIsf(p) {
+      if (p <= 0) return 8.5;
+      if (p >= 0.5) return 0.0;
+      const q = p;
+      // Acklam's inverse normal approximation
+      const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+                 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+      const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+                 6.680131188771972e+01, -1.328068155288572e+01];
+      const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+                 -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+      const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+                 3.754408661907416e+00];
+      const pLow = 0.02425;
+      let z;
+      if (q < pLow) {
+        const r = Math.sqrt(-2.0 * Math.log(q));
+        z = (((((c[0]*r+c[1])*r+c[2])*r+c[3])*r+c[4])*r+c[5]) /
+            ((((d[0]*r+d[1])*r+d[2])*r+d[3])*r+1.0);
+      } else {
+        const r = q - 0.5;
+        const s = r * r;
+        z = (((((a[0]*s+a[1])*s+a[2])*s+a[3])*s+a[4])*s+a[5])*r /
+            (((((b[0]*s+b[1])*s+b[2])*s+b[3])*s+b[4])*s+1.0);
+      }
+      return Math.max(0.0, -z);
+    }
+
+    // Seeded PRNG (Mulberry32)
+    let currentSeed = 42;
+    function makeRng(seed) {
+      let a = seed >>> 0;
+      return function() {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    function randNormal(rng, mean, std) {
+      const u1 = Math.max(1e-12, rng());
+      const u2 = rng();
+      return mean + std * Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    }
+
+    // Global state
+    const mMin = 100.0, mMax = 160.0, nBins = 60, lamTrue = 0.03, sNom = 350.0;
+    const binEdges = Array.from({length: nBins + 1}, (_, i) => mMin + i * 1.0);
+    const binCenters = Array.from({length: nBins}, (_, i) => mMin + i + 0.5);
+    let currentCounts = new Array(nBins).fill(0);
+
+    function expectedYields(mu, bTot, lam, mH, sigma) {
+      const bNorm = Math.exp(-lam * mMin) - Math.exp(-lam * mMax);
+      const sNorm = normCdf(mMax, mH, sigma) - normCdf(mMin, mH, sigma);
+      const nu = new Array(nBins);
+      for (let i = 0; i < nBins; i++) {
+        const a = binEdges[i], b = binEdges[i + 1];
+        const pB = (Math.exp(-lam * a) - Math.exp(-lam * b)) / bNorm;
+        const pS = (normCdf(b, mH, sigma) - normCdf(a, mH, sigma)) / sNorm;
+        nu[i] = Math.max(1e-12, mu * sNom * pS + bTot * pB);
+      }
+      return nu;
+    }
+
+    function poissonNll(counts, expected) {
+      let sum = 0.0;
+      for (let i = 0; i < counts.length; i++) {
+        const nu = Math.max(1e-12, expected[i]);
+        sum += nu - counts[i] * Math.log(nu);
+      }
+      return sum;
+    }
+
+    // Fast analytical / Newton-Raphson profile fit for a given mass hypothesis mH
+    function fitAtMass(counts, mH, sigma) {
+      const totalCounts = counts.reduce((a, b) => a + b, 0);
+      const lam = lamTrue;
+      const bNorm = Math.exp(-lam * mMin) - Math.exp(-lam * mMax);
+      const sNorm = normCdf(mMax, mH, sigma) - normCdf(mMin, mH, sigma);
+
+      const pB = new Array(nBins);
+      const pS = new Array(nBins);
+      for (let i = 0; i < nBins; i++) {
+        const a = binEdges[i], b = binEdges[i + 1];
+        pB[i] = (Math.exp(-lam * a) - Math.exp(-lam * b)) / bNorm;
+        pS[i] = (normCdf(b, mH, sigma) - normCdf(a, mH, sigma)) / sNorm;
+      }
+
+      // Null Hypothesis H0 (mu = 0): closed-form MLE b_hat0 = totalCounts
+      const bHat0 = totalCounts;
+      let nll0 = 0.0;
+      for (let i = 0; i < nBins; i++) {
+        const nu0 = Math.max(1e-12, bHat0 * pB[i]);
+        nll0 += nu0 - counts[i] * Math.log(nu0);
+      }
+
+      // Alternative Hypothesis H1: profile mu with b_tot = totalCounts - mu * sNom
+      // Solve 1D Newton-Raphson for mu
+      let mu = 0.5;
+      for (let iter = 0; iter < 18; iter++) {
+        let g = 0.0, h = 0.0;
+        const bTot = Math.max(100.0, totalCounts - mu * sNom);
+        for (let i = 0; i < nBins; i++) {
+          const dNu = sNom * (pS[i] - pB[i]);
+          const nu = Math.max(1e-9, mu * sNom * pS[i] + bTot * pB[i]);
+          g += dNu * (1.0 - counts[i] / nu);
+          h += counts[i] * (dNu * dNu) / (nu * nu);
+        }
+        if (Math.abs(h) < 1e-12) break;
+        const step = g / h;
+        mu = Math.max(-2.0, Math.min(8.0, mu - step));
+        if (Math.abs(step) < 1e-6) break;
+      }
+
+      const bHat1 = Math.max(100.0, totalCounts - mu * sNom);
+      let nll1 = 0.0, info = 0.0;
+      for (let i = 0; i < nBins; i++) {
+        const dNu = sNom * (pS[i] - pB[i]);
+        const nu1 = Math.max(1e-12, mu * sNom * pS[i] + bHat1 * pB[i]);
+        nll1 += nu1 - counts[i] * Math.log(nu1);
+        info += counts[i] * (dNu * dNu) / (nu1 * nu1);
+      }
+
+      const sigmaMu = 1.0 / Math.sqrt(Math.max(1e-9, info));
+      const q0 = mu > 0 ? Math.max(0.0, 2.0 * (nll0 - nll1)) : 0.0;
+      const zSig = Math.sqrt(q0);
+      const pVal = normSf(zSig);
+
+      return { muHat: mu, bHat: bHat1, sigmaMu, nll0, nll1, q0, zSig, pVal };
+    }
+
+    function generateDataset() {
+      const nB = parseInt(document.getElementById("sl-nb").value, 10);
+      const nS = parseInt(document.getElementById("sl-ns").value, 10);
+      const mH = parseFloat(document.getElementById("sl-mh").value);
+      const sigma = parseFloat(document.getElementById("sl-sigma").value);
+
+      document.getElementById("lbl-nb").textContent = nB.toLocaleString();
+      document.getElementById("lbl-ns").textContent = `${nS} (μ = ${(nS / sNom).toFixed(2)})`;
+      document.getElementById("lbl-mh").textContent = `${mH.toFixed(1)} GeV`;
+      document.getElementById("lbl-sigma").textContent = `${sigma.toFixed(1)} GeV`;
+
+      const rng = makeRng(currentSeed);
+      const counts = new Array(nBins).fill(0);
+      const normExp = 1.0 - Math.exp(-lamTrue * (mMax - mMin));
+
+      for (let i = 0; i < nB; i++) {
+        const u = rng();
+        const m = mMin - Math.log(1.0 - u * normExp) / lamTrue;
+        const idx = Math.floor(m - mMin);
+        if (idx >= 0 && idx < nBins) counts[idx]++;
+      }
+
+      for (let i = 0; i < nS; i++) {
+        const m = randNormal(rng, mH, sigma);
+        const idx = Math.floor(m - mMin);
+        if (idx >= 0 && idx < nBins) counts[idx]++;
+      }
+
+      currentCounts = counts;
+      const peakIdx = Math.min(nBins - 1, Math.max(0, Math.floor(mH - mMin)));
+      document.getElementById("stat-total").textContent = (nB + nS).toLocaleString();
+      document.getElementById("stat-peakbin").textContent = `${counts[peakIdx]} evts`;
+
+      drawStation1(mH, sigma);
+      drawStation3(mH, sigma);
+      drawStation4(sigma);
+    }
+
+    function drawStation1(mH, sigma) {
+      const cv = document.getElementById("cv-spectrum");
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const fit = fitAtMass(currentCounts, mH, sigma);
+      const nuB = expectedYields(0.0, fit.bHat, lamTrue, mH, sigma);
+      const nuSB = expectedYields(fit.muHat, fit.bHat, lamTrue, mH, sigma);
+
+      const padL = 62, padR = 24, padT = 24, padM = 300, padB = 425;
+      const plotW = W - padL - padR;
+      const topH = padM - padT;
+      const botTop = padM + 26;
+      const botH = padB - botTop;
+
+      const maxCount = Math.max(...currentCounts, ...nuSB) * 1.15;
+      const xOf = (m) => padL + ((m - mMin) / (mMax - mMin)) * plotW;
+      const yTop = (c) => padM - (c / maxCount) * topH;
+
+      // Grid lines top
+      ctx.strokeStyle = "#1e293b";
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 4; g++) {
+        const y = padT + (g / 4) * topH;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        const val = Math.round(maxCount * (1 - g / 4));
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText(val, padL - 8, y + 4);
+      }
+
+      // Background dashed curve
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      for (let i = 0; i < nBins; i++) {
+        const x = xOf(binCenters[i]), y = yTop(nuB[i]);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Signal + Background curve
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i < nBins; i++) {
+        const x = xOf(binCenters[i]), y = yTop(nuSB[i]);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Data points & error bars
+      for (let i = 0; i < nBins; i++) {
+        const x = xOf(binCenters[i]);
+        const c = currentCounts[i];
+        const err = Math.sqrt(Math.max(1, c));
+        ctx.strokeStyle = "#cbd5e1";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x, yTop(c - err));
+        ctx.lineTo(x, yTop(c + err));
+        ctx.stroke();
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.arc(x, yTop(c), 2.8, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // Bottom residual plot (Data - Background)
+      const residuals = currentCounts.map((c, i) => c - nuB[i]);
+      const sigCurve = nuSB.map((s, i) => s - nuB[i]);
+      const maxRes = Math.max(40, ...residuals.map(Math.abs), ...sigCurve.map(Math.abs)) * 1.25;
+      const yBot = (r) => botTop + botH * 0.55 - (r / maxRes) * (botH * 0.45);
+
+      ctx.strokeStyle = "#1e293b";
+      ctx.strokeRect(padL, botTop, plotW, botH);
+      ctx.strokeStyle = "#38bdf8";
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padL, yBot(0));
+      ctx.lineTo(W - padR, yBot(0));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Shaded Gaussian bump on residual panel
+      ctx.fillStyle = "rgba(244, 63, 94, 0.22)";
+      ctx.beginPath();
+      ctx.moveTo(xOf(binCenters[0]), yBot(0));
+      for (let i = 0; i < nBins; i++) {
+        ctx.lineTo(xOf(binCenters[i]), yBot(sigCurve[i]));
+      }
+      ctx.lineTo(xOf(binCenters[nBins - 1]), yBot(0));
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < nBins; i++) {
+        const x = xOf(binCenters[i]), y = yBot(sigCurve[i]);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      for (let i = 0; i < nBins; i++) {
+        const x = xOf(binCenters[i]);
+        const r = residuals[i];
+        ctx.fillStyle = "#e2e8f0";
+        ctx.beginPath();
+        ctx.arc(x, Math.max(botTop + 3, Math.min(padB - 3, yBot(r))), 2.3, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // X-axis ticks
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "center";
+      for (let m = 100; m <= 160; m += 10) {
+        const x = xOf(m);
+        ctx.fillText(`${m} GeV`, x, H - 10);
+      }
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#cbd5e1";
+      ctx.fillText("Events / 1 GeV", padL + 10, padT + 16);
+      ctx.fillText("Residuals (Data − Bkg)", padL + 10, botTop + 16);
+    }
+
+    function drawStation2() {
+      const nObs = parseFloat(document.getElementById("sl-nobs").value);
+      const b0 = parseFloat(document.getElementById("sl-b0").value);
+      document.getElementById("lbl-nobs").textContent = nObs.toFixed(0);
+      document.getElementById("lbl-b0").textContent = b0.toFixed(0);
+
+      const nll = (nu) => nu - nObs * Math.log(nu);
+      const nll0 = nll(b0);
+      const nll1 = nll(nObs);
+      const dnll = nll0 - nll1;
+
+      document.getElementById("stat-nll0-bin").textContent = nll0.toFixed(2);
+      document.getElementById("stat-nll1-bin").textContent = nll1.toFixed(2);
+      document.getElementById("stat-dnll-bin").textContent = `+${dnll.toFixed(2)}`;
+
+      const cv = document.getElementById("cv-nll");
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padL = 68, padR = 25, padT = 25, padB = 42;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const nuMin = 35, nuMax = 270;
+
+      const vals = [];
+      for (let nu = nuMin; nu <= nuMax; nu += 2) {
+        vals.push({ nu, v: nll(nu) - nll1 });
+      }
+      const maxV = Math.max(25, ...vals.map(d => d.v));
+      const xOf = (nu) => padL + ((nu - nuMin) / (nuMax - nuMin)) * plotW;
+      const yOf = (dv) => padT + plotH - (dv / maxV) * plotH;
+
+      ctx.strokeStyle = "#1e293b";
+      for (let g = 0; g <= 4; g++) {
+        const y = padT + (g / 4) * plotH;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText((maxV * (1 - g / 4)).toFixed(1), padL - 8, y + 4);
+      }
+
+      // Curve NLL(nu) - NLL(n_obs)
+      ctx.strokeStyle = "#10b981";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      vals.forEach((d, idx) => {
+        const x = xOf(d.nu), y = yOf(d.v);
+        if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Minimum point at nu = nObs
+      const xMin = xOf(nObs), yMin = yOf(0);
+      const xSkeptic = xOf(b0), ySkeptic = yOf(dnll);
+
+      // Penalty vertical segment
+      ctx.strokeStyle = "#f43f5e";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(xSkeptic, yMin);
+      ctx.lineTo(xSkeptic, ySkeptic);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#10b981";
+      ctx.beginPath(); ctx.arc(xMin, yMin, 5, 0, 2 * Math.PI); ctx.fill();
+
+      ctx.fillStyle = "#38bdf8";
+      ctx.beginPath(); ctx.arc(xSkeptic, ySkeptic, 5.5, 0, 2 * Math.PI); ctx.fill();
+
+      ctx.fillStyle = "#e2e8f0";
+      ctx.font = "12px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`Minimum ν̂ = n_obs = ${nObs}`, Math.min(W - 210, xMin + 8), yMin - 10);
+      ctx.fillStyle = "#f43f5e";
+      ctx.fillText(`ΔNLL = +${dnll.toFixed(2)} (Z ≈ ${Math.sqrt(2 * dnll).toFixed(2)}σ)`, Math.min(W - 240, xSkeptic + 10), (yMin + ySkeptic) / 2);
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "center";
+      for (let nu = 50; nu <= 250; nu += 50) {
+        ctx.fillText(`ν = ${nu}`, xOf(nu), H - 12);
+      }
+    }
+
+    function drawStation3(mH, sigma) {
+      const fit = fitAtMass(currentCounts, mH, sigma);
+      document.getElementById("stat-muhat").textContent = `${fit.muHat.toFixed(2)} ± ${fit.sigmaMu.toFixed(2)}`;
+      document.getElementById("stat-q0").textContent = fit.q0.toFixed(2);
+      document.getElementById("stat-zlocal").textContent = `${fit.zSig.toFixed(2)} σ`;
+      document.getElementById("stat-plocal").textContent = fit.pVal.toExponential(2);
+
+      const badge = document.getElementById("badge-verdict");
+      if (fit.zSig >= 5.0) {
+        badge.textContent = `★ ${fit.zSig.toFixed(2)}σ HIGGS DISCOVERY CONFIRMED (≥ 5σ)`;
+        badge.className = "px-4 py-1.5 rounded-full text-xs mono font-bold bg-emerald-500/20 border border-emerald-500/50 text-emerald-300";
+      } else if (fit.zSig >= 3.0) {
+        badge.textContent = `◐ ${fit.zSig.toFixed(2)}σ EVIDENCE FOR SIGNAL (3σ–5σ)`;
+        badge.className = "px-4 py-1.5 rounded-full text-xs mono font-bold bg-amber-500/20 border border-amber-500/50 text-amber-300";
+      } else {
+        badge.textContent = `○ ${fit.zSig.toFixed(2)}σ COMPATIBLE WITH BACKGROUND NOISE (< 3σ)`;
+        badge.className = "px-4 py-1.5 rounded-full text-xs mono font-bold bg-slate-800 border border-slate-700 text-slate-300";
+      }
+
+      const cv = document.getElementById("cv-profile");
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padL = 62, padR = 24, padT = 24, padB = 42;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const muMin = -0.3, muMax = 2.3;
+
+      const pts = [];
+      for (let i = 0; i <= 100; i++) {
+        const mu = muMin + (i / 100) * (muMax - muMin);
+        const nu = expectedYields(mu, fit.bHat, lamTrue, mH, sigma);
+        const val = Math.max(0.0, 2.0 * (poissonNll(currentCounts, nu) - fit.nll1));
+        pts.push({ mu, val });
+      }
+
+      const maxY = Math.max(30.0, fit.q0 * 1.25, 28.0);
+      const xOf = (mu) => padL + ((mu - muMin) / (muMax - muMin)) * plotW;
+      const yOf = (v) => padT + plotH - Math.min(1.0, v / maxY) * plotH;
+
+      ctx.strokeStyle = "#1e293b";
+      for (let g = 0; g <= 4; g++) {
+        const y = padT + (g / 4) * plotH;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText((maxY * (1 - g / 4)).toFixed(0), padL - 8, y + 4);
+      }
+
+      // 1-sigma (2dNLL = 1) and 2-sigma (2dNLL = 4) lines
+      [1, 4, 25].forEach((lvl) => {
+        if (lvl < maxY) {
+          ctx.strokeStyle = lvl === 25 ? "rgba(244,63,94,0.4)" : "rgba(251,191,36,0.35)";
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(padL, yOf(lvl));
+          ctx.lineTo(W - padR, yOf(lvl));
+          ctx.stroke();
+        }
+      });
+      ctx.setLineDash([]);
+
+      // Parabola
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      pts.forEach((p, idx) => {
+        const x = xOf(p.mu), y = yOf(p.val);
+        if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Best fit vertical line
+      ctx.strokeStyle = "#10b981";
+      ctx.setLineDash([5, 4]);
+      ctx.beginPath();
+      ctx.moveTo(xOf(fit.muHat), padT);
+      ctx.lineTo(xOf(fit.muHat), padT + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Intercept at mu = 0
+      const x0 = xOf(0.0), y0 = yOf(fit.q0);
+      ctx.fillStyle = "#f43f5e";
+      ctx.beginPath();
+      ctx.arc(x0, y0, 6, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = "#f8fafc";
+      ctx.font = "12px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`μ=0 Intercept: q₀ = ${fit.q0.toFixed(1)} (Z = ${fit.zSig.toFixed(2)}σ)`, x0 + 10, Math.max(padT + 16, y0));
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "center";
+      for (let m = 0.0; m <= 2.0; m += 0.5) {
+        ctx.fillText(`μ = ${m.toFixed(1)}`, xOf(m), H - 12);
+      }
+    }
+
+    function drawStation4(sigma) {
+      const nTrials = parseInt(document.getElementById("sl-ntrials").value, 10);
+      const mTest = parseFloat(document.getElementById("sl-mtest").value);
+      document.getElementById("lbl-ntrials").textContent = `${nTrials} masses`;
+      document.getElementById("lbl-mtest").textContent = `${mTest.toFixed(1)} GeV`;
+
+      const masses = [];
+      const zLocals = [];
+      let bestM = 125.0, maxZ = -1.0, minP = 1.0;
+
+      for (let m = 110; m <= 150; m += 1.0) {
+        const res = fitAtMass(currentCounts, m, sigma);
+        masses.push(m);
+        zLocals.push(res.zSig);
+        if (res.zSig > maxZ) {
+          maxZ = res.zSig;
+          bestM = m;
+          minP = res.pVal;
+        }
+      }
+
+      const pGlobal = 1.0 - Math.pow(1.0 - minP, nTrials);
+      const zGlobal = normIsf(pGlobal);
+
+      const testFit = fitAtMass(currentCounts, mTest, sigma);
+      const mu95 = Math.max(0.0, testFit.muHat) + 1.64485 * testFit.sigmaMu;
+
+      document.getElementById("stat-bestm").textContent = bestM.toFixed(0);
+      document.getElementById("stat-scan-zloc").textContent = `${maxZ.toFixed(2)} σ`;
+      document.getElementById("stat-scan-zglob").textContent = `${zGlobal.toFixed(2)} σ`;
+      document.getElementById("stat-sigmamu").textContent = testFit.sigmaMu.toFixed(3);
+      document.getElementById("stat-mu95").textContent = mu95.toFixed(3);
+
+      const cv = document.getElementById("cv-scan");
+      const ctx = cv.getContext("2d");
+      const W = cv.width, H = cv.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padL = 62, padR = 24, padT = 24, padB = 42;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+      const maxY = Math.max(6.5, maxZ * 1.18);
+
+      const xOf = (m) => padL + ((m - 110.0) / 40.0) * plotW;
+      const yOf = (z) => padT + plotH - (z / maxY) * plotH;
+
+      ctx.strokeStyle = "#1e293b";
+      for (let g = 0; g <= 5; g++) {
+        const y = padT + (g / 5) * plotH;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W - padR, y); ctx.stroke();
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px monospace";
+        ctx.textAlign = "right";
+        ctx.fillText(`${(maxY * (1 - g / 5)).toFixed(1)}σ`, padL - 8, y + 4);
+      }
+
+      // 3-sigma and 5-sigma thresholds
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = "#fbbf24";
+      ctx.beginPath(); ctx.moveTo(padL, yOf(3.0)); ctx.lineTo(W - padR, yOf(3.0)); ctx.stroke();
+      ctx.strokeStyle = "#f43f5e";
+      ctx.beginPath(); ctx.moveTo(padL, yOf(5.0)); ctx.lineTo(W - padR, yOf(5.0)); ctx.stroke();
+
+      // Global Z line
+      ctx.strokeStyle = "#10b981";
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(padL, yOf(zGlobal)); ctx.lineTo(W - padR, yOf(zGlobal)); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Z_local curve
+      ctx.strokeStyle = "#a855f7";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      masses.forEach((m, i) => {
+        const x = xOf(m), y = yOf(zLocals[i]);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      masses.forEach((m, i) => {
+        ctx.fillStyle = m === mTest ? "#38bdf8" : "#c084fc";
+        ctx.beginPath();
+        ctx.arc(xOf(m), yOf(zLocals[i]), m === mTest ? 5.5 : 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = "#94a3b8";
+      ctx.textAlign = "center";
+      for (let m = 110; m <= 150; m += 5) {
+        ctx.fillText(`${m} GeV`, xOf(m), H - 12);
+      }
+    }
+
+    // Event Listeners
+    ["sl-nb", "sl-ns", "sl-mh", "sl-sigma"].forEach(id => {
+      document.getElementById(id).addEventListener("input", generateDataset);
+    });
+    ["sl-nobs", "sl-b0"].forEach(id => {
+      document.getElementById(id).addEventListener("input", drawStation2);
+    });
+    ["sl-ntrials", "sl-mtest"].forEach(id => {
+      document.getElementById(id).addEventListener("input", () => {
+        const sigma = parseFloat(document.getElementById("sl-sigma").value);
+        drawStation4(sigma);
+      });
+    });
+    document.getElementById("btn-recollide").addEventListener("click", () => {
+      currentSeed = (currentSeed + 137) % 100000;
+      generateDataset();
+    });
+
+    // Initial render
+    generateDataset();
+    drawStation2();
+  </script>
+</body>
+</html>
